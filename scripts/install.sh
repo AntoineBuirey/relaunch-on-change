@@ -4,6 +4,7 @@ set -euo pipefail
 
 readonly ARCHIVE_NAME="relaunch-on-change-linux-x86_64.tar.gz"
 readonly BINARY_NAME="relaunch-on-change"
+readonly COMMAND_NAME="rl"
 readonly DOWNLOAD_URL="https://github.com/AntoineBuirey/relaunch-on-change/releases/latest/download/${ARCHIVE_NAME}"
 readonly PREFIX="${PREFIX:-/usr/local}"
 readonly INSTALL_DIR="${PREFIX}/bin"
@@ -34,8 +35,10 @@ if [[ ! -x "$temp_dir/$BINARY_NAME" ]]; then
 fi
 
 install_command=(install -D -m 755 "$temp_dir/$BINARY_NAME" "$INSTALL_DIR/$BINARY_NAME")
+link_command=(ln -sfn "$BINARY_NAME" "$INSTALL_DIR/$COMMAND_NAME")
 if [[ "$(id -u)" -eq 0 ]]; then
     "${install_command[@]}"
+    "${link_command[@]}"
 else
     if ! command -v sudo >/dev/null 2>&1; then
         echo "Erreur : sudo est requis pour installer dans $INSTALL_DIR." >&2
@@ -43,6 +46,8 @@ else
         exit 1
     fi
     sudo "${install_command[@]}"
+    sudo "${link_command[@]}"
 fi
 
 echo "relaunch-on-change installé dans $INSTALL_DIR/$BINARY_NAME"
+echo "Commande disponible : $COMMAND_NAME"
